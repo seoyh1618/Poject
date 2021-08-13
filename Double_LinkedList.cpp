@@ -225,9 +225,9 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 				(*headNode)=NULL;
 				printf("headNULL RESET\n");
 			 }else{//headNode외 다른 리스트또한 존재할 경우  
-				subHeadNode=removedNode->rightLink;	
-				subHeadNode->leftLink=removedNode->leftLink;
-				removedNode->leftLink->rightLink=subHeadNode;
+				(*headNode)=removedNode->rightLink;
+				 removedNode->leftLink->rightLink=(*headNode);
+				(*headNode)->leftLink=removedNode;
 			 }
 			 free(removedNode);
 			 return;
