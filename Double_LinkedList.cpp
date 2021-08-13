@@ -99,34 +99,34 @@ positionNode* posNodeInit(void){
 void nodeInsertion(listNode** headNode,positionNode* posNode){	
 	 listNode* createNode = nodeCreation();
 	 listNode* subHeadNode = *headNode;
-	 int directValue;
-	 if(subHeadNode == NULL){	//NULL 
+
+	 if(subHeadNode == NULL){					//첫 번째 삽입 
 	 	 createNode->leftLink = createNode;
 		 createNode->rightLink = createNode;
 		 *headNode = createNode;
-		 printf("first insert\n");
+		 printf("First Insert\n");
 		 return;
 	 }
-
-	if(subHeadNode->data > createNode->data){	//HEAD CHANGE
-			createNode->leftLink=(*headNode)->leftLink;
+  
+	if(subHeadNode->data > createNode->data){	//헤드노드 보다 작은값 삽입 : 헤드노드 변경 
+			createNode->leftLink=(*headNode)->leftLink;	//작은값 삽입 및 헤드노드 변경  
 			subHeadNode->leftLink->rightLink=createNode;
 			createNode->rightLink=subHeadNode;
 			subHeadNode->leftLink=createNode;
 			(*headNode)=createNode;
-			if(posNode->startSwitch == 2){//수정 
-				if(1==selectPosInset(headNode,posNode,createNode->data));		
+			if(posNode->startSwitch == 2){								 
+				if(1==selectPosInset(headNode,posNode,createNode->data));//headNode보다 작은값 삽입시 우측으로 이동 함수가 integer 타입을 반환하기때문에 써줌, right 값 증가 및 2이나 타켓 노드 지정이 필요한경우  
 			}else{
-				posNode->startSwitch++;
+				posNode->startSwitch++;		
 			}
 			printf("Head Change \n");
 			return;
 	}
 
- 	if(1==selectPosInset(headNode,posNode,createNode->data)){//right MIDDLE
+ 	if(1==selectPosInset(headNode,posNode,createNode->data)){	//N 번째 노드 헤드노드 기준 우측 탐색  삽입  
 		do{	
-		    if(subHeadNode->data > createNode->data){
-		    	createNode->leftLink=subHeadNode->leftLink;
+		    if(subHeadNode->data > createNode->data){			//타켓지정될시 항상 중간에 삽입 되기때문에 지정전 : 중간의 삽입코드 지정후 : 해당 코드로만 삽입 
+		    	createNode->leftLink=subHeadNode->leftLink;		
 		    	subHeadNode->leftLink->rightLink=createNode;
 		    	createNode->rightLink=subHeadNode;
 		    	subHeadNode->leftLink=createNode;
@@ -134,17 +134,16 @@ void nodeInsertion(listNode** headNode,positionNode* posNode){
 			}
 			subHeadNode=subHeadNode->rightLink; 	
 		}while(subHeadNode != *headNode);
-  		
-		createNode->leftLink=subHeadNode->leftLink;
+  		 
+		createNode->leftLink=subHeadNode->leftLink;				//타켓 노드 지정전 마지막노드 삽입 불가하여 마지막 노드삽입하게하는 코드 
  		subHeadNode->leftLink->rightLink=createNode;
   		createNode->rightLink=subHeadNode;
    		subHeadNode->leftLink=createNode;	
-   		
-	}else{//left 
-	    while(1){
-	    	subHeadNode=subHeadNode->leftLink;	
+	}else{														//N 번째 노드 헤드노드 기준 좌측 탐색  삽입 , 타켓지정전에는 사용 x 마지막 노드 삽입 코드 x  
+	    while(1){												//무조건적 삽입 되기때문에 무한루프 가능 
+	    	subHeadNode=subHeadNode->leftLink;					
 	    	
-			if(subHeadNode->data < createNode->data){
+			if(subHeadNode->data < createNode->data){			//중간 삽입하는 코드 
 		    	createNode->leftLink=subHeadNode;
 		    	createNode->rightLink=subHeadNode->rightLink;
 				subHeadNode->rightLink->leftLink=createNode;
@@ -159,84 +158,85 @@ void nodeInsertion(listNode** headNode,positionNode* posNode){
 int selectPosInset(listNode** headNode, positionNode* posNode ,element compareData){
 	int reSetTarget; 
 
-	if( posNode->startSwitch < 2){
+	if( posNode->startSwitch < 2){										// startSwitch 2가 아닐경우 증가 및 우측 탐색 삽입 
 		posNode->startSwitch++;
 		return 1;
 	}
-	else if(posNode->targetNode == NULL){
+	else if(posNode->targetNode == NULL){								// node개수가 현재 3개이며 return시 삽입이 진행됨으로 target노드 지정 
 			posNode->targetNode = (*headNode)->rightLink->rightLink;
 			printf("Taget setting %d \n",posNode->targetNode->data);
 			return 1;
 	}
 	
-	if((posNode->targetNode->data) > compareData){
+	if((posNode->targetNode->data) > compareData){						// tartget 노드보다 삽입될 데이터가 작을경우 우측 탐색 및 밸런스 증가  
 		posNode->rightBalance++;
 		printf("Search to right %d\n",posNode->rightBalance);
 	    
 	    reSetTarget = abs((posNode->rightBalance)-(posNode->leftBalance));
 		
-	    if((posNode->leftBalance) < (posNode->rightBalance) && reSetTarget == 2){
+	    if((posNode->leftBalance) < (posNode->rightBalance) && reSetTarget == 2){	//밸런스가 깨졌을 경우 왼쪽으로 이동하여 타켓노드 재정의 및 초기화 
 			posNode->targetNode = posNode->targetNode->leftLink;
   			posNode->rightBalance = 0;
   			posNode->leftBalance = 0;
 			printf("Target Change right %d\n",posNode->targetNode->data); 
 		}
-		return 1; 
+		return 1; 														// 우측 탐색 할 수 있도록 값 리턴  
 		
-	}else{
+	}else{																//tartget 노드보다 삽입될 데이터가 클경우 좌측 탐색 및 밸런스 증가  
         posNode->leftBalance++;
         printf("Search to left : %d \n",posNode->leftBalance);
         
 		reSetTarget = abs((posNode->leftBalance)-(posNode->rightBalance));
 		
-		if((posNode->leftBalance) > (posNode->rightBalance) && reSetTarget == 2){
+		if((posNode->leftBalance) > (posNode->rightBalance) && reSetTarget == 2){ //밸런스가 깨졌을 경우 우측으로 이동하여 타켓노드 재정의 및 초기화 
 			posNode->targetNode = posNode->targetNode->rightLink;
   			posNode->rightBalance = 0;
   			posNode->leftBalance = 0;  
   			printf("Target Change left %d\n",posNode->targetNode->data); 
 		}
-		return 2; 
+		return 2; 														//좌측 탐색 할 수 있도록 값 리턴 
     }	
 }
 // Delete
 void nodeDelete(listNode** headNode,positionNode* posNode){
-	listNode* subHeadNode = *headNode;
+	listNode* subHeadNode = *headNode;			
 	listNode* removedNode;
 	element deleteData;
 	
 	printf("삭제할 값을 입력하세요\n >> ");
 	scanf("%d",&deleteData);
-	/*if(deleteData == 0){//Node clear
+	
+	if(deleteData == 999){				//999입력시 전체노드 폭파  
 		(*headNode)=NULL;
-		printf("Sucess ALL clear\n");1111
-	}*/
+		printf("Sucess ALL clear\n");
+	}
+										 
+	if(posNode->targetNode==NULL){ 				// node가 3개 이하, 타켓 노드 미지정시 삭제 
 			
-	if(posNode->targetNode==NULL){ // 3개 이하의 경우  
-			
-		if((*headNode)==NULL){//NODE is empty 
+		if((*headNode)==NULL){							// NODE is empty 
 			printf("리스트가 비어 있습니다. \n"); 
 			return;
 		}
-		else if(subHeadNode->data==deleteData){//HeadNode가 삭제 대상 
+		else if(subHeadNode->data==deleteData){ 		// HeadNode가 삭제 대상 
 			 removedNode=subHeadNode;
 			 
-			 if(subHeadNode->rightLink==subHeadNode){//HeadNode만 존재할 경우  
+			 if(subHeadNode->rightLink==subHeadNode){		//HeadNode만 존재할 경우  
 				(*headNode)=NULL;
 				printf("headNULL RESET\n");
-			 }else{//headNode외 다른 리스트또한 존재할 경우  
-				(*headNode)=removedNode->rightLink;
+			 }else{											//노드가 2 , 3 개의 헤드노드 삭제시 
+				(*headNode)=removedNode->rightLink;		
 				removedNode->leftLink->rightLink=(*headNode);
 			    subHeadNode->leftLink=removedNode;
-				posNode->startSwitch--; 
+				posNode->startSwitch--; 					//노드가 4번째 삽입시 target노드가 지정 될 수 있도록 2 , 3개의 경우 스위치 감소  
 			 }
 			 free(removedNode);
 			 return;
 		}
-		else{
-			do{									//3,2번째 노드삭제
+		else{											// 2번 , 3번 노드가 삭제될 경우   
+			do{											
 				subHeadNode = subHeadNode->rightLink;
 				if(subHeadNode->data==deleteData){ 
-					posNode->startSwitch--;
+					posNode->startSwitch--;				//노드가 4번째 삽입시 target노드가 지정 될 수 있도록 2 , 3개의 경우 스위치 감소  
 					removedNode = subHeadNode;
 					removedNode->leftLink->rightLink = removedNode->rightLink;
 					removedNode->rightLink->leftLink=removedNode->leftLink;
@@ -245,29 +245,27 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 				}
 			}while(subHeadNode != (*headNode));
 			printf(" 삭제할 값이 없습니다. \n");	
-			posNode->startSwitch++;
+			posNode->startSwitch++;						//삭제를 진행하지 못하면 스위치 원래상태로 복구 
 		}
 	}
-	// 4개이상 
-	else{
-		if((*headNode)->data == deleteData && 1==selectPosDelete(headNode,posNode,deleteData)){//4개이상 첫번째 값 삭제  
+	
+	else{										// node가 4개 이상, 타켓 노드 지정시 삭제 
+		if((*headNode)->data == deleteData && 1==selectPosDelete(headNode,posNode,deleteData)){//headNode가 삭제대상 , leftbalance 증가, 삭제시 타켓 재설정 위해 함수 호출
 			removedNode=(*headNode);
 			(*headNode)=removedNode->rightLink;
 			removedNode->leftLink->rightLink=(*headNode);
 			(*headNode)->leftLink=removedNode;
 			free(removedNode);
 		
-			if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
+			if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){                      //삭제를 진행후 노드가 3개일경우 타켓노드, 밸런스값 초기화  
 					posNode->targetNode=NULL;
 					posNode->rightBalance=0;
 					posNode->leftBalance=0;
 			}			
 			
 			return;
-		}else{
-									//4개이상 첫번째 값이 아님  
-			if(1==selectPosDelete(headNode,posNode,deleteData)){
-				
+		}else{																					//4개이상 N번째 노드가 삭제대상 
+			if(1==selectPosDelete(headNode,posNode,deleteData)){								//deleteData 값이 타켓 데이터보다 작으면 오른쪽 탐색 
 				do{					
 					subHeadNode=subHeadNode->rightLink;
 					
@@ -275,7 +273,7 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 						removedNode=subHeadNode;
 						removedNode->leftLink->rightLink = removedNode->rightLink;
 						removedNode->rightLink->leftLink=removedNode->leftLink;
-						if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
+						if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){		//삭제를 진행후 노드가 3개일경우 타켓노드, 밸런스값 초기화
 								posNode->targetNode=NULL;
 								posNode->rightBalance=0;
 								posNode->leftBalance=0;
@@ -283,19 +281,19 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 						return;
 					}
 				}while(subHeadNode != posNode->targetNode);
-					posNode->leftBalance++;	
-			}else{
-			if(posNode->targetNode->data == deleteData){
-					posNode->targetNode = posNode->targetNode->leftLink;	
-				}
-				do{					
+				posNode->leftBalance++;														//삭제노드 찾지 못하면 원래대로 leftbalance 복구 
+			}else{																			//deleteData 값이 크거나 같으면 왼쪽 탐색
+				if(posNode->targetNode->data == deleteData){								//타켓노드가 삭제 되야할 경우  
+						posNode->targetNode = posNode->targetNode->leftLink;				//타켓노드보다 큰값이 들어있는 left로 한칸이동 > 그래야 targetNode까지 비교하기때문에 그래야 삭제됨  
+				   }
+				do{																			//왼쪽으로 삭제노드 탐색 
 					subHeadNode=subHeadNode->leftLink;
-					
-					if(subHeadNode->data == deleteData){
+						
+					if(subHeadNode->data == deleteData){									// 일치하면삭제 
 						removedNode=subHeadNode;
 						removedNode->leftLink->rightLink = removedNode->rightLink;
 						removedNode->rightLink->leftLink=removedNode->leftLink;
-						if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
+						if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){		//삭제를 진행후 노드가 3개일경우 타켓노드, 밸런스값 초기화
 								posNode->targetNode=NULL;
 								posNode->rightBalance=0;
 								posNode->leftBalance=0;
@@ -303,59 +301,59 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 						return;
 					}
 				}while(subHeadNode != posNode->targetNode);
-					posNode->rightBalance++;			
+				posNode->rightBalance++;													//찾지 못하면 오른쪽값 복구  
 			}
 		} 
-	printf("삭제할 값이 없습니다. \n");
+	printf("삭제할 값이 없습니다. \n");														//문구출력 
 	}
 }
 // setting Position_delete
 int selectPosDelete(listNode** headNode, positionNode* posNode, element deleteData){
 	
-	int reSetTarget;
+	int reSetTarget;											//타켓을 재설정할 조건을 비교할 변수  
 	
-	if((posNode->targetNode->data) >= deleteData){//target 노드를 삭제할 경우 
-		if((posNode->targetNode->data)==deleteData){
-			posNode->targetNode=posNode->targetNode->rightLink;
-			if(posNode->leftBalance==1){
+	if((posNode->targetNode->data) >= deleteData){ 				
+		if((posNode->targetNode->data)==deleteData){			//타켓이 삭제 대상이 될경우  
+			posNode->targetNode=posNode->targetNode->rightLink;   
+			if(posNode->leftBalance==1){						//left 값이 증가되고 오른쪽 탐색을 해야함 ... 
 				posNode->leftBalance=0;
 			}
 		}
-		posNode->leftBalance++;
-		printf("Search to right %d\n",posNode->rightBalance);
+		posNode->leftBalance++;									// 오른쪽 노드가 삭제될 예정이니 미리 왼쪽 노드의 값을 증가  
+		printf("Search to right %d\n",posNode->rightBalance);	
 		
-		reSetTarget = abs((posNode->rightBalance)-(posNode->leftBalance));
+		reSetTarget = abs((posNode->rightBalance)-(posNode->leftBalance));	//차이값 저장  
 	
-	    if((posNode->leftBalance) > (posNode->rightBalance) && reSetTarget == 2){
+	    if((posNode->leftBalance) > (posNode->rightBalance) && reSetTarget == 2){	//밸런스의 차이가 2가 될 경우 타켓 및 밸런스값 초기화 
 			posNode->targetNode = posNode->targetNode->rightLink;
   			posNode->rightBalance = 0;
   			posNode->leftBalance = 0;
 			printf("Target Change Left %d\n",posNode->targetNode->data); 
-		}
-		return 1;
+		}	
+		return 1;																	//오른쪽 탐색할 수 있도록 값 리턴 
 	}else{
-        posNode->rightBalance++;
+        posNode->rightBalance++;								// 왼쪽 노드가 삭제될 예정이니 미리 오른쪽 노드의 값을 증가
         printf("Search to left : %d \n",posNode->leftBalance);
         
 		reSetTarget = abs((posNode->rightBalance)-(posNode->leftBalance));
 	
-	    if((posNode->leftBalance) < (posNode->rightBalance) && reSetTarget == 2){
+	    if((posNode->leftBalance) < (posNode->rightBalance) && reSetTarget == 2){	//밸런스의 차이가 2가 될 경우 타켓 및 밸런스값 초기화 
 			posNode->targetNode = posNode->targetNode->leftLink;
   			posNode->rightBalance = 0;
   			posNode->leftBalance = 0;
 			printf("Target Change Left %d\n",posNode->targetNode->data); 
 		}
-		return 2;
-	}
+		return 2;																	//왼쪽 탐색할 수 있도록 값 리턴 
+	}						
 }
 // nodeCheck
 void nodeCheck(listNode** headNode){
 	listNode* subHeadNode = (*headNode);
-	if(subHeadNode==NULL){
+	if(subHeadNode==NULL){									//없으면 없다는 문구 출력 
 		printf("리스트의 값이 존재하지 않습니다.\n");
 		return;
 	}
-	do{
+	do{														//모든 노드 출력 
 		printf("<- %d ->",subHeadNode->data);
 		subHeadNode = subHeadNode->rightLink;
 	}while(subHeadNode!= *headNode);
