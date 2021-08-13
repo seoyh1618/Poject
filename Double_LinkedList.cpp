@@ -115,7 +115,7 @@ void nodeInsertion(listNode** headNode,positionNode* posNode){
 			subHeadNode->leftLink=createNode;
 			(*headNode)=createNode;
 			if(posNode->startSwitch == 2){//수정 
-				posNode->rightBalance++;	
+				if(1==selectPosInset(headNode,posNode,createNode->data));		
 			}else{
 				posNode->startSwitch++;
 			}
@@ -158,7 +158,7 @@ void nodeInsertion(listNode** headNode,positionNode* posNode){
 }
 // setting Position_insert
 int selectPosInset(listNode** headNode, positionNode* posNode ,element compareData){
-	int reSetTargetRight,reSetTargetLeft; 
+	int reSetTarget; 
 
 	if( posNode->startSwitch < 2){
 		posNode->startSwitch++;
@@ -170,40 +170,27 @@ int selectPosInset(listNode** headNode, positionNode* posNode ,element compareDa
 			return 1;
 	}
 	
-	if( (posNode->targetNode->data) > compareData){
+	if((posNode->targetNode->data) > compareData){
 		posNode->rightBalance++;
 		printf("Search to right %d\n",posNode->rightBalance);
 	    
-	    reSetTargetRight = (posNode->rightBalance)-(posNode->leftBalance);
-		reSetTargetLeft = (posNode->leftBalance)-(posNode->rightBalance);
+	    reSetTarget = abs((posNode->rightBalance)-(posNode->leftBalance));
 		
-	    if(reSetTargetRight==2){
+	    if((posNode->leftBalance) < (posNode->rightBalance) && reSetTarget == 2){
 			posNode->targetNode = posNode->targetNode->leftLink;
   			posNode->rightBalance = 0;
   			posNode->leftBalance = 0;
 			printf("Target Change right %d\n",posNode->targetNode->data); 
 		}
-		else if(reSetTargetLeft==2){
-			posNode->targetNode = posNode->targetNode->rightLink;
-  			posNode->rightBalance = 0;
-  			posNode->leftBalance = 0;  
-  			printf("Target Change left %d\n",posNode->targetNode->data); 
-		}
 		return 1; 
+		
 	}else{
         posNode->leftBalance++;
         printf("Search to left : %d \n",posNode->leftBalance);
         
-		reSetTargetRight = (posNode->rightBalance)-(posNode->leftBalance);
-		reSetTargetLeft = (posNode->leftBalance)-(posNode->rightBalance);
+		reSetTarget = abs((posNode->leftBalance)-(posNode->rightBalance));
 		
-        if(reSetTargetRight==2){
-			posNode->targetNode = posNode->targetNode->leftLink;
-  			posNode->rightBalance = 0;
-  			posNode->leftBalance = 0;
-			printf("Target Change right %d\n",posNode->targetNode->data); 
-		}
-		else if(reSetTargetLeft==2){
+		if((posNode->leftBalance) > (posNode->rightBalance) && reSetTarget == 2){
 			posNode->targetNode = posNode->targetNode->rightLink;
   			posNode->rightBalance = 0;
   			posNode->leftBalance = 0;  
@@ -269,7 +256,12 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 			subHeadNode->leftLink=removedNode->leftLink;
 			removedNode->leftLink->rightLink=subHeadNode;
 			posNode->leftBalance++;
-
+			
+			if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
+					posNode->targetNode=NULL;
+					posNode->rightBalance=0;
+					posNode->leftBalance=0;
+			}			
 			free(removedNode);
 		}
 		else{								//4개이상 첫번째 값이 아님  
@@ -277,8 +269,9 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 				if(posNode->targetNode->data == deleteData){
 					posNode->targetNode = posNode->targetNode->leftLink;	
 				}
-				do{
+				do{					
 					subHeadNode=subHeadNode->rightLink;
+					
 					if(subHeadNode->data == deleteData){
 						removedNode=subHeadNode;
 						removedNode->leftLink->rightLink = removedNode->rightLink;
@@ -287,49 +280,35 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 								posNode->targetNode=NULL;
 								posNode->rightBalance=0;
 								posNode->leftBalance=0;
-						}else if(posNode->targetNode=NULL){
-								posNode->startSwitch--;
 						}
 						return;
 					}
 				}while(subHeadNode != posNode->targetNode);
 					posNode->leftBalance++;	
-			}	
-		}
-		
-		if((*headNode)->rightLink->rightLink->rightLink->rightLink==(*headNode)){
-				posNode->startSwitch--;
-				posNode->targetNode=NULL;
-				posNode->rightBalance=0;
-				posNode->leftBalance=0;
-		}
-	} 
-	
-	else{
-		if(posNode->targetNode->data == deleteData){
-			posNode->targetNode = posNode->targetNode->rightLink;
-		}
-		do{
-			subHeadNode = subHeadNode->leftLink;
-			if(subHeadNode->data == deleteData){
-				removedNode=subHeadNode;
-				removedNode->leftLink->rightLink = removedNode->rightLink;
-				removedNode->rightLink->leftLink=removedNode->leftLink;
-				if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
-					posNode->targetNode=NULL;
-					posNode->rightBalance=0;
-					posNode->leftBalance=0;
-				}else if(posNode->targetNode=NULL){
-					posNode->startSwitch--;
-					
+			}else{
+			if(posNode->targetNode->data == deleteData){
+					posNode->targetNode = posNode->targetNode->leftLink;	
 				}
-				return;
+				do{					
+					subHeadNode=subHeadNode->leftLink;
+					
+					if(subHeadNode->data == deleteData){
+						removedNode=subHeadNode;
+						removedNode->leftLink->rightLink = removedNode->rightLink;
+						removedNode->rightLink->leftLink=removedNode->leftLink;
+						if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
+								posNode->targetNode=NULL;
+								posNode->rightBalance=0;
+								posNode->leftBalance=0;
+						}
+						return;
+					}
+				}while(subHeadNode != posNode->targetNode);
+					posNode->rightBalance++;			
 			}
-		}while(subHeadNode != posNode->targetNode);
-		posNode->rightBalance++;
-	}
-	
+		} 
 	printf("삭제할 값이 없습니다. \n");
+	}
 }
 // setting Position_delete
 int selectPosDelete(listNode** headNode, positionNode* posNode, element deleteData){
