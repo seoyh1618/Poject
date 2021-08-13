@@ -96,7 +96,7 @@ positionNode* posNodeInit(void){
 }
 
 // Insertion
-void nodeInsertion(listNode** headNode,positionNode* posNode){
+void nodeInsertion(listNode** headNode,positionNode* posNode){	
 	 listNode* createNode = nodeCreation();
 	 listNode* subHeadNode = *headNode;
 	 int directValue;
@@ -250,27 +250,24 @@ void nodeDelete(listNode** headNode,positionNode* posNode){
 	}
 	// 4개이상 
 	else{
-		if((*headNode)->data == deleteData){//4개이상 첫번째 값 삭제  
-			removedNode=subHeadNode;
-			posNode->leftBalance++;
-			
+		if((*headNode)->data == deleteData && 1==selectPosDelete(headNode,posNode,deleteData)){//4개이상 첫번째 값 삭제  
+			removedNode=(*headNode);
 			(*headNode)=removedNode->rightLink;
 			removedNode->leftLink->rightLink=(*headNode);
-			subHeadNode->leftLink=removedNode;
+			(*headNode)->leftLink=removedNode;
+			free(removedNode);
 		
 			if((*headNode)->rightLink->rightLink->rightLink==(*headNode)){
 					posNode->targetNode=NULL;
 					posNode->rightBalance=0;
 					posNode->leftBalance=0;
 			}			
-			free(removedNode);
+			
 			return;
-		}
-		else{								//4개이상 첫번째 값이 아님  
+		}else{
+									//4개이상 첫번째 값이 아님  
 			if(1==selectPosDelete(headNode,posNode,deleteData)){
-				if(posNode->targetNode->data == deleteData){
-					posNode->targetNode=posNode->targetNode->leftLink;	
-				}
+				
 				do{					
 					subHeadNode=subHeadNode->rightLink;
 					
@@ -317,7 +314,13 @@ int selectPosDelete(listNode** headNode, positionNode* posNode, element deleteDa
 	
 	int reSetTarget;
 	
-	if((posNode->targetNode->data) > deleteData){
+	if((posNode->targetNode->data) >= deleteData){//target 노드를 삭제할 경우 
+		if((posNode->targetNode->data)==deleteData){
+			posNode->targetNode=posNode->targetNode->rightLink;
+			if(posNode->leftBalance==1){
+				posNode->leftBalance=0;
+			}
+		}
 		posNode->leftBalance++;
 		printf("Search to right %d\n",posNode->rightBalance);
 		
@@ -356,5 +359,6 @@ void nodeCheck(listNode** headNode){
 		printf("<- %d ->",subHeadNode->data);
 		subHeadNode = subHeadNode->rightLink;
 	}while(subHeadNode!= *headNode);
+		
 	printf("\n");
 }
